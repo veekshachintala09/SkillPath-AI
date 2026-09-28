@@ -1,0 +1,8 @@
+{
+  "name": "SkillPath AI",
+  "description": "Beginner-friendly platform that generates complete, interactive step-by-step learning roadmaps for any skill from zero to career ready.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
