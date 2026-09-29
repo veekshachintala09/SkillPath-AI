@@ -1,12 +1,55 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useRoadmap } from '../context/RoadmapContext';
-import { Compass, Sparkles, Menu, X, PlusCircle, Flame, CheckCircle2 } from 'lucide-react';
+import { Compass, Sparkles, Menu, X, PlusCircle, Flame, CheckCircle2, Type, Check } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
-  const { activeTab, setActiveTab, setCustomSkillModalOpen, userProgress, currentRoadmap } = useRoadmap();
+  const {
+    activeTab,
+    setActiveTab,
+    setCustomSkillModalOpen,
+    userProgress,
+    currentRoadmap,
+    fontFamily,
+    setFontFamily,
+    readingComfort,
+    setReadingComfort,
+  } = useRoadmap();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [fontMenuOpen, setFontMenuOpen] = useState(false);
+  const fontMenuRef = useRef<HTMLDivElement>(null);
 
   const completedCount = userProgress.completedTopicIds.length;
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (fontMenuRef.current && !fontMenuRef.current.contains(e.target as Node)) {
+        setFontMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const fontOptions = [
+    {
+      id: 'lexend' as const,
+      name: 'Lexend',
+      tag: 'Easiest to Understand',
+      desc: 'Engineered by educational researchers to maximize reading comprehension and reduce visual strain.',
+    },
+    {
+      id: 'outfit' as const,
+      name: 'Outfit',
+      tag: 'Modern & Distinct',
+      desc: 'Geometric, warm, and inviting with generous rounded curves.',
+    },
+    {
+      id: 'jakarta' as const,
+      name: 'Jakarta Sans',
+      tag: 'Crisp Tech',
+      desc: 'Compact technical sans-serif for sharp data density.',
+    },
+  ];
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-800/80 bg-[#070B14]/90 backdrop-blur-md">
@@ -106,7 +149,85 @@ export const Navbar: React.FC = () => {
         </nav>
 
         {/* Zone 3: Primary Actions */}
-        <div className="hidden sm:flex items-center gap-3">
+        <div className="hidden sm:flex items-center gap-2.5">
+          {/* Font & Readability Dropdown */}
+          <div className="relative" ref={fontMenuRef}>
+            <button
+              onClick={() => setFontMenuOpen(!fontMenuOpen)}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-slate-300 bg-[#121A2B] hover:bg-slate-800 border border-slate-700/70 hover:border-purple-500/50 rounded-lg transition-all cursor-pointer shadow-sm"
+              title="Typography & Reading Comfort"
+            >
+              <Type className="h-3.5 w-3.5 text-cyan-400" />
+              <span className="capitalize font-medium">{fontFamily}</span>
+            </button>
+
+            {fontMenuOpen && (
+              <div className="absolute right-0 mt-2 w-72 bg-[#0D1220] border border-slate-700/80 rounded-2xl shadow-2xl p-3 z-50 animate-fadeIn backdrop-blur-xl space-y-3">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                    Font & Readability
+                  </span>
+                  <span className="text-[10px] text-cyan-400 font-mono">Instant preview</span>
+                </div>
+
+                {/* Font Choices */}
+                <div className="space-y-1.5">
+                  {fontOptions.map((opt) => (
+                    <button
+                      key={opt.id}
+                      onClick={() => {
+                        setFontFamily(opt.id);
+                      }}
+                      className={`w-full text-left p-2.5 rounded-xl border transition-all cursor-pointer flex items-start justify-between gap-2 ${
+                        fontFamily === opt.id
+                          ? 'bg-purple-950/60 border-purple-500 text-white shadow-sm'
+                          : 'bg-[#121A2B]/60 border-slate-800 text-slate-300 hover:border-slate-700 hover:text-white'
+                      }`}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold">{opt.name}</span>
+                          <span
+                            className={`text-[9px] px-1.5 py-0.5 rounded font-mono ${
+                              opt.id === 'lexend'
+                                ? 'bg-cyan-950 text-cyan-300 border border-cyan-500/30'
+                                : 'bg-slate-800 text-slate-400'
+                            }`}
+                          >
+                            {opt.tag}
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-slate-400 mt-1 leading-snug">
+                          {opt.desc}
+                        </p>
+                      </div>
+                      {fontFamily === opt.id && (
+                        <Check className="h-4 w-4 text-cyan-400 shrink-0 mt-0.5" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Reading Comfort Toggle */}
+                <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-xs">
+                  <span className="text-slate-400 font-medium">Spacious Line Height</span>
+                  <button
+                    onClick={() =>
+                      setReadingComfort(readingComfort === 'normal' ? 'spacious' : 'normal')
+                    }
+                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition-colors cursor-pointer ${
+                      readingComfort === 'spacious'
+                        ? 'bg-cyan-950 border-cyan-500 text-cyan-300'
+                        : 'bg-slate-800/80 border-slate-700 text-slate-400'
+                    }`}
+                  >
+                    {readingComfort === 'spacious' ? 'Spacious On' : 'Standard'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
           <button
             onClick={() => setCustomSkillModalOpen(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-300 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 rounded-lg transition-colors"
@@ -222,6 +343,28 @@ export const Navbar: React.FC = () => {
           >
             About
           </button>
+
+          <div className="pt-2 border-t border-slate-800/80">
+            <div className="flex items-center justify-between text-xs text-slate-400 mb-2 px-1">
+              <span className="font-semibold uppercase text-[10px] tracking-wider text-slate-400">Reading Font:</span>
+              <span className="capitalize text-cyan-400 font-bold">{fontFamily}</span>
+            </div>
+            <div className="grid grid-cols-3 gap-1.5">
+              {fontOptions.map((opt) => (
+                <button
+                  key={opt.id}
+                  onClick={() => setFontFamily(opt.id)}
+                  className={`py-1.5 px-2 text-xs rounded-lg font-semibold border transition-all ${
+                    fontFamily === opt.id
+                      ? 'bg-purple-900/60 border-purple-500 text-white'
+                      : 'bg-slate-800/60 border-slate-700/60 text-slate-400'
+                  }`}
+                >
+                  {opt.name}
+                </button>
+              ))}
+            </div>
+          </div>
 
           <div className="pt-2 border-t border-slate-800/80 flex gap-2">
             <button

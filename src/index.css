@@ -1,16 +1,55 @@
 @import "tailwindcss";
 
+:root {
+  --app-font-family: 'Lexend', system-ui, -apple-system, sans-serif;
+  --app-heading-font: 'Outfit', 'Lexend', system-ui, sans-serif;
+}
+
 @layer base {
   body {
-    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    font-family: var(--app-font-family);
     background-color: #070B14;
     color: #F8FAFC;
     overflow-x: hidden;
+    letter-spacing: -0.01em;
+    line-height: 1.6;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--app-heading-font);
+    letter-spacing: -0.02em;
   }
 
   code, pre, .font-mono {
     font-family: 'JetBrains Mono', monospace;
   }
+}
+
+/* Font themes */
+html[data-font="lexend"] {
+  --app-font-family: 'Lexend', system-ui, -apple-system, sans-serif;
+  --app-heading-font: 'Lexend', system-ui, sans-serif;
+}
+
+html[data-font="outfit"] {
+  --app-font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+  --app-heading-font: 'Outfit', system-ui, sans-serif;
+}
+
+html[data-font="jakarta"] {
+  --app-font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --app-heading-font: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+/* Reading Comfort modes */
+html[data-comfort="spacious"] body {
+  letter-spacing: 0.01em;
+  line-height: 1.75;
+  font-size: 1.03rem;
+}
+
+html[data-comfort="spacious"] p {
+  line-height: 1.8;
 }
 
 /* Custom dark scrollbar */

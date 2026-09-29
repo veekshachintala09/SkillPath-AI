@@ -30,6 +30,10 @@ interface RoadmapContextType {
   setN8nWidgetOpen: (open: boolean) => void;
   n8nWebhookUrl: string;
   setN8nWebhookUrl: (url: string) => void;
+  fontFamily: 'lexend' | 'outfit' | 'jakarta';
+  setFontFamily: (font: 'lexend' | 'outfit' | 'jakarta') => void;
+  readingComfort: 'normal' | 'spacious';
+  setReadingComfort: (comfort: 'normal' | 'spacious') => void;
 }
 
 const STORAGE_KEY = 'skillpath_ai_user_progress_v1';
@@ -71,6 +75,33 @@ export const RoadmapProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [n8nWebhookUrl, setN8nWebhookUrl] = useState(
     'https://veeksha09.app.n8n.cloud/webhook/5c0b5dc9-97a6-493d-b0a3-1d508d6129b9/chat'
   );
+  const [fontFamily, setFontFamily] = useState<'lexend' | 'outfit' | 'jakarta'>(() => {
+    try {
+      const saved = localStorage.getItem('skillpath_font');
+      if (saved === 'lexend' || saved === 'outfit' || saved === 'jakarta') {
+        return saved;
+      }
+    } catch {}
+    return 'lexend';
+  });
+  const [readingComfort, setReadingComfort] = useState<'normal' | 'spacious'>(() => {
+    try {
+      const saved = localStorage.getItem('skillpath_comfort');
+      if (saved === 'normal' || saved === 'spacious') {
+        return saved;
+      }
+    } catch {}
+    return 'normal';
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-font', fontFamily);
+    document.documentElement.setAttribute('data-comfort', readingComfort);
+    try {
+      localStorage.setItem('skillpath_font', fontFamily);
+      localStorage.setItem('skillpath_comfort', readingComfort);
+    } catch {}
+  }, [fontFamily, readingComfort]);
 
   const [userProgress, setUserProgress] = useState<UserProgress>(() => {
     try {
@@ -287,6 +318,10 @@ export const RoadmapProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setN8nWidgetOpen,
         n8nWebhookUrl,
         setN8nWebhookUrl,
+        fontFamily,
+        setFontFamily,
+        readingComfort,
+        setReadingComfort,
       }}
     >
       {children}
