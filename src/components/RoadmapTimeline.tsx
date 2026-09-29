@@ -15,6 +15,7 @@ import {
   Search,
   BookOpen,
   ArrowLeft,
+  Bot,
 } from 'lucide-react';
 
 export const RoadmapTimeline: React.FC = () => {
@@ -24,6 +25,7 @@ export const RoadmapTimeline: React.FC = () => {
     setPersonalizationModalOpen,
     setPendingSkillToPersonalize,
     setActiveTab,
+    setN8nWidgetOpen,
   } = useRoadmap();
 
   const [searchFilter, setSearchFilter] = useState('');
@@ -72,6 +74,15 @@ export const RoadmapTimeline: React.FC = () => {
         </button>
 
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => setN8nWidgetOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-950/70 hover:bg-cyan-900/90 border border-cyan-500/50 text-cyan-300 text-xs font-semibold shadow-sm transition-all cursor-pointer hover:border-cyan-400"
+            title="Ask live n8n AI Agent about this roadmap"
+          >
+            <Bot className="h-3.5 w-3.5 text-cyan-400" />
+            <span>Ask n8n AI Agent</span>
+          </button>
+
           <button
             onClick={() => {
               setPendingSkillToPersonalize(currentRoadmap.title.replace(' Roadmap', ''));

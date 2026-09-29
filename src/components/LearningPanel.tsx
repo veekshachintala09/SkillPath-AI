@@ -15,9 +15,10 @@ import {
   ChevronRight,
   BookOpen,
 } from 'lucide-react';
+import { sendN8nMessage } from '../utils/n8nClient';
 
 export const LearningPanel: React.FC = () => {
-  const { activeTopic, setActiveTopic, toggleTopicCompletion, isTopicCompleted, currentRoadmap } = useRoadmap();
+  const { activeTopic, setActiveTopic, toggleTopicCompletion, isTopicCompleted, currentRoadmap, n8nWebhookUrl } = useRoadmap();
   const [copiedCode, setCopiedCode] = useState(false);
   const [visibleHints, setVisibleHints] = useState<Record<string, boolean>>({});
   const [visibleSolutions, setVisibleSolutions] = useState<Record<string, boolean>>({});
@@ -54,20 +55,12 @@ export const LearningPanel: React.FC = () => {
     if (askTarget === 'n8n') {
       try {
         const fullPrompt = `Topic: "${activeTopic.title}" in ${currentRoadmap.title}.\nUser Question: ${aiQuestion.trim()}`;
-        const res = await fetch('/api/n8n-agent/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            message: fullPrompt,
-            sessionId: `lesson-${activeTopic.id}`,
-          }),
+        const result = await sendN8nMessage({
+          message: fullPrompt,
+          sessionId: `lesson-${activeTopic.id}`,
+          webhookUrl: n8nWebhookUrl,
         });
-        const data = await res.json();
-        setAiAnswer(
-          data.output ||
-            data.answer ||
-            'Received empty response from n8n agent workflow.'
-        );
+        setAiAnswer(result.output || result.error || 'Connected to n8n AI Agent.');
       } catch (err: any) {
         setAiAnswer(`Could not reach n8n agent: ${err?.message || err}`);
       } finally {

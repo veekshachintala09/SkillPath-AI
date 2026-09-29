@@ -1,10 +1,10 @@
 import React from 'react';
 import { SearchBar } from './SearchBar';
-import { Sparkles, Route, Code2, Trophy, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
+import { Sparkles, Route, Code2, Trophy, ArrowRight, ShieldCheck, Zap, Bot } from 'lucide-react';
 import { useRoadmap } from '../context/RoadmapContext';
 
 export const Hero: React.FC = () => {
-  const { loadRoadmapBySlug, setActiveTab } = useRoadmap();
+  const { loadRoadmapBySlug, setActiveTab, setN8nWidgetOpen } = useRoadmap();
 
   return (
     <section className="relative overflow-hidden pt-8 pb-16 md:pt-14 md:pb-24 border-b border-slate-800/80">
@@ -37,6 +37,34 @@ export const Hero: React.FC = () => {
         {/* Search Bar */}
         <div className="mt-8 sm:mt-10">
           <SearchBar />
+        </div>
+
+        {/* Prominent Ask n8n AI Agent Callout */}
+        <div className="mt-8 max-w-2xl mx-auto p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-purple-950/70 via-[#0D1220] to-cyan-950/70 border border-cyan-500/40 shadow-xl shadow-cyan-950/20 flex flex-col sm:flex-row items-center justify-between gap-3 text-left">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-cyan-950/90 border border-cyan-500/50 flex items-center justify-center text-cyan-300 shrink-0 shadow-sm">
+              <Bot className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
+                <span>Ask n8n AI Agent</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-950/90 border border-emerald-500/60 text-emerald-400 font-mono font-medium">
+                  LIVE WORKFLOW
+                </span>
+              </div>
+              <p className="text-[11px] sm:text-xs text-slate-300 mt-0.5">
+                Stuck choosing a path or need custom advice? Chat live with your n8n cloud workflow!
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={() => setN8nWidgetOpen(true)}
+            className="w-full sm:w-auto shrink-0 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 text-white font-bold text-xs shadow-lg shadow-purple-600/30 transition-all cursor-pointer"
+          >
+            <span>Ask n8n AI Agent</span>
+            <ArrowRight className="h-3.5 w-3.5" />
+          </button>
         </div>
 
         {/* Feature Highlights Grid */}

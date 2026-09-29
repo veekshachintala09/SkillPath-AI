@@ -5,11 +5,12 @@ import {
   X,
   Send,
   Maximize2,
-  RefreshCw,
   Sparkles,
-  Clock,
-  Workflow,
+  Zap,
+  ArrowRight,
+  MessageSquare,
 } from 'lucide-react';
+import { sendN8nMessage } from '../utils/n8nClient';
 
 interface FloatingMessage {
   id: string;
@@ -23,7 +24,7 @@ export const N8nFloatingWidget: React.FC = () => {
     {
       id: '1',
       sender: 'agent',
-      text: 'Hi! I am your live n8n AI Agent. Ask me anything about your current learning path or request custom advice!',
+      text: 'Hi! I am your live n8n AI Agent. Ask me anything about your current learning path, project ideas, or request custom study tips!',
     },
   ]);
   const [input, setInput] = useState('');
@@ -35,42 +36,29 @@ export const N8nFloatingWidget: React.FC = () => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading, n8nWidgetOpen]);
 
-  const handleSend = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    const query = input.trim();
+  const handleSend = async (customPrompt?: string) => {
+    const query = (customPrompt || input).trim();
     if (!query || isLoading) return;
 
     setMessages((prev) => [...prev, { id: `u-${Date.now()}`, sender: 'user', text: query }]);
-    setInput('');
+    if (!customPrompt) setInput('');
     setIsLoading(true);
 
     try {
-      const res = await fetch('/api/n8n-agent/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: query,
-          sessionId,
-          webhookUrl: n8nWebhookUrl,
-        }),
+      const result = await sendN8nMessage({
+        message: query,
+        sessionId,
+        webhookUrl: n8nWebhookUrl,
       });
 
-      const data = await res.json();
-      if (data && data.success && data.output) {
-        setMessages((prev) => [
-          ...prev,
-          { id: `a-${Date.now()}`, sender: 'agent', text: data.output },
-        ]);
-      } else {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: `a-${Date.now()}`,
-            sender: 'agent',
-            text: data?.error || 'Received empty output from n8n agent workflow.',
-          },
-        ]);
-      }
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `a-${Date.now()}`,
+          sender: 'agent',
+          text: result.output || result.error || 'Connected to n8n agent workflow.',
+        },
+      ]);
     } catch (err: any) {
       setMessages((prev) => [
         ...prev,
@@ -86,37 +74,49 @@ export const N8nFloatingWidget: React.FC = () => {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-40">
-      {/* Floating Toggle Button */}
+    <aside aria-label="n8n AI Agent Assistant" className="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 z-[60]">
+      {/* Floating Toggle Button - Always visible, high contrast, vibrant glow */}
       {!n8nWidgetOpen && (
         <button
           onClick={() => setN8nWidgetOpen(true)}
-          className="group flex items-center gap-2.5 px-4 py-3 rounded-full bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 text-white font-bold text-xs sm:text-sm shadow-2xl shadow-purple-600/40 hover:shadow-cyan-500/40 hover:scale-105 active:scale-95 transition-all cursor-pointer border border-white/20"
+          className="group relative flex items-center gap-2.5 px-4 py-3 sm:px-5 sm:py-3.5 rounded-full bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 text-white font-bold text-xs sm:text-sm shadow-2xl shadow-purple-600/50 hover:shadow-cyan-500/50 hover:scale-105 active:scale-95 transition-all cursor-pointer border border-white/30 backdrop-blur-md"
+          title="Ask n8n AI Agent"
+          aria-label="Ask n8n AI Agent"
         >
-          <div className="relative">
-            <Bot className="h-5 w-5 text-white" />
+          {/* Animated Glow Halo */}
+          <span className="absolute -inset-0.5 rounded-full bg-gradient-to-r from-purple-500 to-cyan-400 opacity-60 blur-sm group-hover:opacity-100 transition-opacity -z-10 animate-pulse" />
+
+          <div className="relative flex items-center justify-center">
+            <Bot className="h-5 w-5 text-white group-hover:rotate-12 transition-transform duration-300" />
             <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-emerald-400 border border-[#070B14] animate-ping" />
             <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-emerald-400 border border-[#070B14]" />
           </div>
-          <span>Ask n8n AI Agent</span>
+
+          <span className="tracking-wide flex items-center gap-1.5 font-bold">
+            <span>Ask n8n AI Agent</span>
+            <span className="hidden sm:inline-block px-1.5 py-0.2 text-[10px] uppercase font-mono rounded bg-white/20 text-cyan-200">
+              LIVE
+            </span>
+          </span>
         </button>
       )}
 
       {/* Floating Chat Popup Window */}
       {n8nWidgetOpen && (
-        <div className="w-[360px] sm:w-[420px] h-[520px] rounded-3xl bg-[#0D1220] border border-purple-500/40 shadow-2xl flex flex-col overflow-hidden animate-fadeIn backdrop-blur-xl">
+        <div className="w-[calc(100vw-2rem)] sm:w-[420px] max-w-[420px] h-[520px] max-h-[85vh] rounded-3xl bg-[#0D1220] border border-purple-500/50 shadow-2xl shadow-purple-950/80 flex flex-col overflow-hidden animate-fadeIn backdrop-blur-2xl">
           {/* Header */}
           <div className="p-4 bg-gradient-to-r from-[#121A2B] to-[#0D1220] border-b border-slate-800 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="h-8 w-8 rounded-xl bg-purple-900/60 border border-purple-500/40 flex items-center justify-center text-cyan-300">
+              <div className="h-8 w-8 rounded-xl bg-purple-900/70 border border-purple-500/50 flex items-center justify-center text-cyan-300 shadow-sm">
                 <Bot className="h-4 w-4" />
               </div>
               <div>
                 <div className="text-xs font-bold text-white flex items-center gap-1.5">
-                  <span>n8n AI Agent</span>
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                  <span>Ask n8n AI Agent</span>
+                  <span className="h-2 w-2 rounded-full bg-emerald-400 inline-block" />
+                  <span className="text-[10px] text-emerald-400 font-mono font-medium">ONLINE</span>
                 </div>
-                <div className="text-[10px] text-slate-400 font-mono">
+                <div className="text-[10px] text-slate-400 font-mono truncate max-w-[190px]">
                   veeksha09.app.n8n.cloud
                 </div>
               </div>
@@ -130,7 +130,7 @@ export const N8nFloatingWidget: React.FC = () => {
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
                 className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"
-                title="Expand to Full Project Page"
+                title="Open Fullscreen Agent Studio"
               >
                 <Maximize2 className="h-4 w-4" />
               </button>
@@ -145,15 +145,15 @@ export const N8nFloatingWidget: React.FC = () => {
           </div>
 
           {/* Quick Context Pill */}
-          <div className="px-3 py-1.5 bg-[#070B14] border-b border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
-            <span>Context: {currentRoadmap.title}</span>
+          <div className="px-3.5 py-2 bg-[#070B14] border-b border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
+            <span className="truncate max-w-[200px]">Context: {currentRoadmap.title}</span>
             <button
               onClick={() => {
-                setInput(`I'm learning ${currentRoadmap.title}. Can you suggest the best 3 starter exercises?`);
+                handleSend(`I'm learning ${currentRoadmap.title}. Can you recommend the top 3 starter projects to build?`);
               }}
-              className="text-cyan-400 hover:underline cursor-pointer"
+              className="text-cyan-400 hover:text-cyan-300 hover:underline cursor-pointer shrink-0 font-medium"
             >
-              Ask about {currentRoadmap.title.replace(' Roadmap', '')}
+              Ask about {currentRoadmap.title.replace(' Roadmap', '')} →
             </button>
           </div>
 
@@ -172,9 +172,9 @@ export const N8nFloatingWidget: React.FC = () => {
                   </div>
                 )}
                 <div
-                  className={`p-3 rounded-2xl max-w-[85%] whitespace-pre-line ${
+                  className={`p-3 rounded-2xl max-w-[85%] whitespace-pre-line shadow-sm ${
                     m.sender === 'user'
-                      ? 'bg-purple-600 text-white rounded-br-none'
+                      ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-br-none'
                       : 'bg-[#121A2B] border border-slate-800 text-slate-200 rounded-bl-none'
                   }`}
                 >
@@ -184,16 +184,44 @@ export const N8nFloatingWidget: React.FC = () => {
             ))}
 
             {isLoading && (
-              <div className="flex items-center gap-2 text-xs text-slate-400">
+              <div className="flex items-center gap-2 text-xs text-slate-400 p-2">
                 <span className="h-2 w-2 rounded-full bg-cyan-400 animate-ping" />
-                <span>n8n AI agent is responding...</span>
+                <span>n8n AI agent is processing via cloud workflow...</span>
               </div>
             )}
             <div ref={chatEndRef} />
           </div>
 
+          {/* Quick Prompts */}
+          <div className="px-3 py-1.5 bg-[#070B14]/80 border-t border-slate-800 flex items-center gap-1.5 overflow-x-auto text-[11px]">
+            <button
+              onClick={() => handleSend('What should I learn first as an absolute beginner?')}
+              className="shrink-0 px-2 py-1 rounded bg-[#121A2B] hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/60 transition-colors"
+            >
+              Where to start?
+            </button>
+            <button
+              onClick={() => handleSend('Give me 3 realistic project ideas for my portfolio')}
+              className="shrink-0 px-2 py-1 rounded bg-[#121A2B] hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/60 transition-colors"
+            >
+              Project ideas
+            </button>
+            <button
+              onClick={() => handleSend('How do I prepare for a junior developer technical interview?')}
+              className="shrink-0 px-2 py-1 rounded bg-[#121A2B] hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/60 transition-colors"
+            >
+              Interview prep
+            </button>
+          </div>
+
           {/* Input Form */}
-          <form onSubmit={handleSend} className="p-3 bg-[#0D1220] border-t border-slate-800 flex gap-2">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSend();
+            }}
+            className="p-3 bg-[#0D1220] border-t border-slate-800 flex gap-2"
+          >
             <input
               type="text"
               value={input}
@@ -205,13 +233,13 @@ export const N8nFloatingWidget: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading || !input.trim()}
-              className="p-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white disabled:opacity-40 transition-colors cursor-pointer"
+              className="p-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 text-white disabled:opacity-40 transition-colors cursor-pointer"
             >
               <Send className="h-3.5 w-3.5" />
             </button>
           </form>
         </div>
       )}
-    </div>
+    </aside>
   );
 };

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useRoadmap } from '../context/RoadmapContext';
-import { Compass, Sparkles, Menu, X, PlusCircle, Flame, CheckCircle2, Type, Check } from 'lucide-react';
+import { Compass, Sparkles, Menu, X, PlusCircle, Flame, CheckCircle2, Type, Check, Bot } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const {
@@ -13,6 +13,7 @@ export const Navbar: React.FC = () => {
     setFontFamily,
     readingComfort,
     setReadingComfort,
+    setN8nWidgetOpen,
   } = useRoadmap();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [fontMenuOpen, setFontMenuOpen] = useState(false);
@@ -120,7 +121,7 @@ export const Navbar: React.FC = () => {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </span>
-            <span>n8n AI Agent</span>
+            <span>Ask n8n AI Agent</span>
           </button>
           <button
             onClick={() => setActiveTab('progress')}
@@ -236,6 +237,20 @@ export const Navbar: React.FC = () => {
             <span>Custom Skill</span>
           </button>
 
+          {/* Dedicated Ask n8n AI Agent Button in Top Bar */}
+          <button
+            onClick={() => setN8nWidgetOpen(true)}
+            className="group flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-cyan-300 bg-cyan-950/70 hover:bg-cyan-900/90 border border-cyan-500/50 hover:border-cyan-400 rounded-lg shadow-md shadow-cyan-950/50 hover:shadow-cyan-500/20 transition-all cursor-pointer"
+            title="Ask live n8n AI Agent"
+          >
+            <div className="relative">
+              <Bot className="h-4 w-4 text-cyan-400 group-hover:rotate-12 transition-transform" />
+              <span className="absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping" />
+              <span className="absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full bg-emerald-400" />
+            </div>
+            <span>Ask n8n AI Agent</span>
+          </button>
+
           <button
             onClick={() => {
               setActiveTab('roadmap');
@@ -252,6 +267,14 @@ export const Navbar: React.FC = () => {
 
         {/* Mobile Hamburger Toggle */}
         <div className="flex md:hidden items-center gap-2">
+          <button
+            onClick={() => setN8nWidgetOpen(true)}
+            className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold text-cyan-300 bg-cyan-950/80 border border-cyan-500/50 rounded-lg"
+            title="Ask n8n AI Agent"
+          >
+            <Bot className="h-3.5 w-3.5 text-cyan-400" />
+            <span>n8n Agent</span>
+          </button>
           <button
             onClick={() => setCustomSkillModalOpen(true)}
             className="p-1.5 text-slate-300 hover:text-white bg-slate-800/60 rounded-lg border border-slate-700/50"
@@ -272,6 +295,28 @@ export const Navbar: React.FC = () => {
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
         <div className="md:hidden border-b border-slate-800 bg-[#070B14]/95 px-4 pt-3 pb-5 space-y-2">
+          {/* Prominent Ask n8n AI Agent Callout at Top of Mobile Menu */}
+          <button
+            onClick={() => {
+              setN8nWidgetOpen(true);
+              setMobileMenuOpen(false);
+            }}
+            className="w-full text-left p-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-between bg-gradient-to-r from-purple-950/90 to-cyan-950/90 border border-cyan-500/50 text-cyan-300 shadow-lg cursor-pointer"
+          >
+            <div className="flex items-center gap-2.5">
+              <div className="h-7 w-7 rounded-lg bg-cyan-900/60 border border-cyan-500/40 flex items-center justify-center text-cyan-300">
+                <Bot className="h-4 w-4" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-white text-xs font-bold">Ask n8n AI Agent</span>
+                <span className="text-[10px] text-slate-400 font-normal">Chat live with cloud workflow</span>
+              </div>
+            </div>
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-950 border border-emerald-500/50 text-emerald-400 font-mono">
+              ONLINE
+            </span>
+          </button>
+
           <button
             onClick={() => {
               setActiveTab('home');
@@ -314,7 +359,7 @@ export const Navbar: React.FC = () => {
               activeTab === 'n8n-agent' ? 'bg-cyan-950/60 text-cyan-300' : 'text-slate-300 hover:bg-slate-800/60'
             }`}
           >
-            <span>n8n AI Agent Project</span>
+            <span>n8n AI Agent Studio</span>
             <span className="text-[10px] text-emerald-400 font-mono">LIVE</span>
           </button>
           <button

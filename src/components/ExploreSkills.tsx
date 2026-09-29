@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { skillCategories, SkillCategoryCard } from '../data/roadmaps';
 import { SkillCard } from './SkillCard';
 import { SkillCategory } from '../types/roadmap';
-import { PlusCircle, Sparkles, Filter } from 'lucide-react';
+import { PlusCircle, Sparkles, Filter, Bot, ArrowRight } from 'lucide-react';
 import { useRoadmap } from '../context/RoadmapContext';
 
 export const ExploreSkills: React.FC = () => {
-  const { setCustomSkillModalOpen } = useRoadmap();
+  const { setCustomSkillModalOpen, setN8nWidgetOpen } = useRoadmap();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [difficultyFilter, setDifficultyFilter] = useState<string>('all');
 
@@ -96,6 +96,40 @@ export const ExploreSkills: React.FC = () => {
             <div className="flex items-center gap-1.5 text-xs font-semibold text-cyan-400 group-hover:underline">
               <span>Start Generator</span>
               <Sparkles className="h-3.5 w-3.5 text-yellow-300" />
+            </div>
+          </div>
+        </div>
+
+        {/* Ask n8n AI Agent Card */}
+        <div
+          onClick={() => setN8nWidgetOpen(true)}
+          className="group relative flex flex-col justify-between rounded-2xl bg-gradient-to-b from-[#121A2B] to-[#0D1220] border-2 border-cyan-500/40 hover:border-cyan-300 p-6 shadow-xl hover:shadow-cyan-950/40 transition-all cursor-pointer"
+        >
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-950/80 border border-cyan-500/50 text-cyan-300 group-hover:scale-110 transition-transform shadow-sm">
+                <Bot className="h-6 w-6 text-cyan-400" />
+              </div>
+              <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-950/60 border border-emerald-500/40 px-2.5 py-1 rounded-md flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping" />
+                Live Agent
+              </span>
+            </div>
+
+            <h3 className="text-xl font-bold text-white group-hover:text-cyan-300 transition-colors flex items-center gap-2">
+              <span>Ask n8n AI Agent</span>
+            </h3>
+
+            <p className="mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed">
+              Unsure which technology aligns with your career goals? Talk directly with our live n8n workflow agent for personalized curriculum guidance, tech stack comparisons, and project advice.
+            </p>
+          </div>
+
+          <div className="mt-6 pt-4 border-t border-slate-800/80 flex items-center justify-between">
+            <span className="text-xs text-slate-400 font-mono">veeksha09.app.n8n.cloud</span>
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-cyan-400 group-hover:underline">
+              <span>Chat with Agent</span>
+              <ArrowRight className="h-3.5 w-3.5" />
             </div>
           </div>
         </div>

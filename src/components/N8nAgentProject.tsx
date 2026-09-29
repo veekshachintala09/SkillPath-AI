@@ -20,6 +20,7 @@ import {
   Workflow,
   ExternalLink,
 } from 'lucide-react';
+import { sendN8nMessage } from '../utils/n8nClient';
 
 interface ChatMessage {
   id: string;
@@ -103,41 +104,37 @@ Ask me to build a custom roadmap, explain a tough concept, give you interview ad
     const startTime = Date.now();
 
     try {
-      const response = await fetch('/api/n8n-agent/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message,
-          sessionId,
-          webhookUrl: n8nWebhookUrl,
-        }),
+      const result = await sendN8nMessage({
+        message,
+        sessionId,
+        webhookUrl: n8nWebhookUrl,
       });
 
-      const data = await response.json();
       const elapsed = Date.now() - startTime;
-      setLastPayloadReceived(data);
+      setLastPayloadReceived(result.raw || { output: result.output, source: result.source });
 
-      if (data && data.success && data.output) {
+      if (result.success && result.output) {
         const agentMsg: ChatMessage = {
           id: `agent-${Date.now()}`,
           sender: 'agent',
-          text: data.output,
+          text: result.output,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          latencyMs: data.latencyMs || elapsed,
-          rawPayload: data.raw,
+          latencyMs: result.latencyMs || elapsed,
+          rawPayload: result.raw,
         };
         setMessages((prev) => [...prev, agentMsg]);
       } else {
         const errorText =
-          data?.error ||
-          (data?.raw?.message ? `n8n Notice: ${data.raw.message}` : 'Could not retrieve response from n8n webhook.');
+          result.error ||
+          result.output ||
+          'Could not retrieve response from n8n webhook.';
         const fallbackMsg: ChatMessage = {
           id: `agent-${Date.now()}`,
           sender: 'agent',
-          text: `⚠️ **n8n Agent Response:**\n${errorText}\n\n*Tip:* Verify that your n8n workflow at \`${n8nWebhookUrl}\` is toggled to **Active** in the n8n Cloud editor.`,
+          text: `⚠️ **n8n Agent Response:**\n${errorText}\n\n*Tip:* Verify that your n8n workflow at \`${n8nWebhookUrl}\` is toggled to **Active** in your n8n Cloud editor.`,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           latencyMs: elapsed,
-          rawPayload: data,
+          rawPayload: result.raw,
         };
         setMessages((prev) => [...prev, fallbackMsg]);
       }
@@ -146,7 +143,7 @@ Ask me to build a custom roadmap, explain a tough concept, give you interview ad
       const agentErrorMsg: ChatMessage = {
         id: `agent-${Date.now()}`,
         sender: 'agent',
-        text: `⚠️ **Connection Error:** Could not contact server proxy to n8n webhook.\n\n\`${err?.message || err}\``,
+        text: `⚠️ **Connection Error:** Could not contact n8n webhook.\n\n\`${err?.message || err}\``,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         latencyMs: elapsed,
       };
