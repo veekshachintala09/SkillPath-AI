@@ -239,6 +239,85 @@ Provide a concise, encouraging response (3 short paragraphs) with:
   }
 });
 
+// Endpoint: n8n AI Agent Proxy
+app.post('/api/n8n-agent/chat', async (req: Request, res: Response) => {
+  const {
+    message,
+    sessionId = `session-${Date.now()}`,
+    webhookUrl = 'https://veeksha09.app.n8n.cloud/webhook/5c0b5dc9-97a6-493d-b0a3-1d508d6129b9/chat',
+  } = req.body;
+
+  if (!message) {
+    return res.status(400).json({ error: 'Message is required' });
+  }
+
+  const startTime = Date.now();
+
+  try {
+    const payload = {
+      action: 'sendMessage',
+      sessionId: String(sessionId),
+      chatInput: String(message),
+      message: String(message),
+    };
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000); // 30s timeout
+
+    const response = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json, text/plain, */*',
+      },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeout);
+    const durationMs = Date.now() - startTime;
+
+    const responseText = await response.text();
+    let data: any = null;
+
+    try {
+      data = JSON.parse(responseText);
+    } catch {
+      data = { output: responseText };
+    }
+
+    // Extract message from common n8n formats
+    const output =
+      data?.output ??
+      data?.text ??
+      data?.message ??
+      data?.response ??
+      (typeof data === 'string' ? data : JSON.stringify(data));
+
+    return res.json({
+      success: response.ok,
+      status: response.status,
+      output: output,
+      raw: data,
+      latencyMs: durationMs,
+      sessionId,
+      webhookUrl,
+    });
+  } catch (err: any) {
+    const durationMs = Date.now() - startTime;
+    console.error('n8n proxy error:', err);
+    return res.status(500).json({
+      success: false,
+      error:
+        err.name === 'AbortError'
+          ? 'n8n workflow request timed out after 30 seconds'
+          : err?.message || 'Failed to reach n8n webhook',
+      latencyMs: durationMs,
+      webhookUrl,
+    });
+  }
+});
+
 // Setup Vite middlewares for development or serve dist for production
 async function startServer() {
   const isProd = process.env.NODE_ENV === 'production';

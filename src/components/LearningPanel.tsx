@@ -24,6 +24,7 @@ export const LearningPanel: React.FC = () => {
   const [aiQuestion, setAiQuestion] = useState('');
   const [aiAnswer, setAiAnswer] = useState<string | null>(null);
   const [isAiLoading, setIsAiLoading] = useState(false);
+  const [askTarget, setAskTarget] = useState<'n8n' | 'builtin'>('n8n');
 
   if (!activeTopic) return null;
 
@@ -49,6 +50,31 @@ export const LearningPanel: React.FC = () => {
 
     setIsAiLoading(true);
     setAiAnswer(null);
+
+    if (askTarget === 'n8n') {
+      try {
+        const fullPrompt = `Topic: "${activeTopic.title}" in ${currentRoadmap.title}.\nUser Question: ${aiQuestion.trim()}`;
+        const res = await fetch('/api/n8n-agent/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: fullPrompt,
+            sessionId: `lesson-${activeTopic.id}`,
+          }),
+        });
+        const data = await res.json();
+        setAiAnswer(
+          data.output ||
+            data.answer ||
+            'Received empty response from n8n agent workflow.'
+        );
+      } catch (err: any) {
+        setAiAnswer(`Could not reach n8n agent: ${err?.message || err}`);
+      } finally {
+        setIsAiLoading(false);
+      }
+      return;
+    }
 
     try {
       const res = await fetch('/api/ai-explain-topic', {
@@ -273,12 +299,43 @@ export const LearningPanel: React.FC = () => {
 
           {/* 6. AI Tutor Live Assistant Box */}
           <div className="rounded-2xl bg-[#070B14] border border-cyan-500/40 p-5 shadow-lg">
-            <div className="flex items-center gap-2 text-sm font-bold text-cyan-300 mb-2">
-              <Sparkles className="h-4 w-4 text-cyan-400" />
-              <span>Ask AI Tutor About This Topic</span>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2 text-sm font-bold text-cyan-300">
+                <Sparkles className="h-4 w-4 text-cyan-400" />
+                <span>Ask AI Tutor About This Topic</span>
+              </div>
+
+              {/* Selector */}
+              <div className="flex items-center gap-1 bg-[#0D1220] p-1 rounded-lg border border-slate-800 text-[11px]">
+                <button
+                  type="button"
+                  onClick={() => setAskTarget('n8n')}
+                  className={`px-2 py-0.5 rounded font-medium transition-colors cursor-pointer ${
+                    askTarget === 'n8n'
+                      ? 'bg-cyan-600 text-white shadow-sm'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  n8n AI Agent
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAskTarget('builtin')}
+                  className={`px-2 py-0.5 rounded font-medium transition-colors cursor-pointer ${
+                    askTarget === 'builtin'
+                      ? 'bg-purple-600 text-white shadow-sm'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  Local Tutor
+                </button>
+              </div>
             </div>
+
             <p className="text-xs text-slate-400 mb-3">
-              Still stuck or want an extra simple analogy? Ask a question:
+              {askTarget === 'n8n'
+                ? 'Routing directly to your live n8n cloud AI Agent workflow.'
+                : 'Still stuck or want an extra simple analogy? Ask a question:'}
             </p>
 
             <form onSubmit={handleAskAi} className="flex gap-2">

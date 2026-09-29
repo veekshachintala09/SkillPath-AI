@@ -9,6 +9,8 @@ import { AboutSection } from './components/AboutSection';
 import { LearningPanel } from './components/LearningPanel';
 import { PersonalizationModal } from './components/PersonalizationModal';
 import { CustomSkillModal } from './components/CustomSkillModal';
+import { N8nAgentProject } from './components/N8nAgentProject';
+import { N8nFloatingWidget } from './components/N8nFloatingWidget';
 import { Footer } from './components/Footer';
 
 function MainAppContent() {
@@ -32,6 +34,8 @@ function MainAppContent() {
 
         {activeTab === 'roadmap' && <RoadmapTimeline />}
 
+        {activeTab === 'n8n-agent' && <N8nAgentProject />}
+
         {activeTab === 'progress' && <ProgressDashboard />}
 
         {activeTab === 'about' && <AboutSection />}
@@ -41,6 +45,9 @@ function MainAppContent() {
       <LearningPanel />
       <PersonalizationModal />
       <CustomSkillModal />
+
+      {/* Floating n8n AI Agent Chat Widget */}
+      <N8nFloatingWidget />
 
       {/* Footer */}
       <Footer />

@@ -8,8 +8,8 @@ interface RoadmapContextType {
   setCurrentRoadmap: (roadmap: Roadmap) => void;
   activeTopic: Topic | null;
   setActiveTopic: (topic: Topic | null) => void;
-  activeTab: 'home' | 'explore' | 'roadmap' | 'progress' | 'about';
-  setActiveTab: (tab: 'home' | 'explore' | 'roadmap' | 'progress' | 'about') => void;
+  activeTab: 'home' | 'explore' | 'roadmap' | 'n8n-agent' | 'progress' | 'about';
+  setActiveTab: (tab: 'home' | 'explore' | 'roadmap' | 'n8n-agent' | 'progress' | 'about') => void;
   userProgress: UserProgress;
   toggleTopicCompletion: (topicId: string) => void;
   toggleProjectCompletion: (projectId: string) => void;
@@ -26,6 +26,10 @@ interface RoadmapContextType {
   applyPersonalization: (config: PersonalizationConfig) => void;
   isGenerating: boolean;
   generationStep: string;
+  n8nWidgetOpen: boolean;
+  setN8nWidgetOpen: (open: boolean) => void;
+  n8nWebhookUrl: string;
+  setN8nWebhookUrl: (url: string) => void;
 }
 
 const STORAGE_KEY = 'skillpath_ai_user_progress_v1';
@@ -57,12 +61,16 @@ const RoadmapContext = createContext<RoadmapContextType | undefined>(undefined);
 export const RoadmapProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentRoadmap, setCurrentRoadmap] = useState<Roadmap>(preloadedRoadmaps.java);
   const [activeTopic, setActiveTopic] = useState<Topic | null>(null);
-  const [activeTab, setActiveTab] = useState<'home' | 'explore' | 'roadmap' | 'progress' | 'about'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'explore' | 'roadmap' | 'n8n-agent' | 'progress' | 'about'>('home');
   const [personalizationModalOpen, setPersonalizationModalOpen] = useState(false);
   const [pendingSkillToPersonalize, setPendingSkillToPersonalize] = useState<string | null>(null);
   const [customSkillModalOpen, setCustomSkillModalOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationStep, setGenerationStep] = useState('');
+  const [n8nWidgetOpen, setN8nWidgetOpen] = useState(false);
+  const [n8nWebhookUrl, setN8nWebhookUrl] = useState(
+    'https://veeksha09.app.n8n.cloud/webhook/5c0b5dc9-97a6-493d-b0a3-1d508d6129b9/chat'
+  );
 
   const [userProgress, setUserProgress] = useState<UserProgress>(() => {
     try {
@@ -275,6 +283,10 @@ export const RoadmapProvider: React.FC<{ children: React.ReactNode }> = ({ child
         applyPersonalization,
         isGenerating,
         generationStep,
+        n8nWidgetOpen,
+        setN8nWidgetOpen,
+        n8nWebhookUrl,
+        setN8nWebhookUrl,
       }}
     >
       {children}
